@@ -6,6 +6,8 @@ const logger = require("morgan");
 
 const apiRouter = require("./routes/index");
 
+require("./passport");
+
 const app = express();
 
 // view engine setup
