@@ -20,9 +20,11 @@ exports.login = (req, res, next) => {
         });
       }
 
-      const token = jwt.sign(user, process.env.JWT_SECRET);
+      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
 
-      return res.json({ success: true, user, token });
+      return res.json({ success: true, token });
     });
   })(req, res);
 };
