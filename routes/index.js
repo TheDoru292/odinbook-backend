@@ -9,9 +9,12 @@ db.on("error", console.error.bind(console, "mongo connection error"));
 
 const usersRouter = require("./users");
 const authRouter = require("./auth");
+const postRouter = require("./post");
 
 router.use("/user", usersRouter);
 
 router.use("/auth", authRouter);
+
+router.use("/post", postRouter);
 
 module.exports = router;
