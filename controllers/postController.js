@@ -1,5 +1,6 @@
 const { body, validationResult } = require("express-validator");
 const post = require("../models/post");
+const ErrorHandler = require("../lib/ErrorHandler");
 
 exports.get = (req, res) => {
   const { page = 1, limit = 10 } = req.query;
@@ -12,11 +13,8 @@ exports.get = (req, res) => {
     },
     (err, posts) => {
       if (err) {
-        return res.status(500).json({
-          success: false,
-          code: 500,
-          status: "Internal server error",
-        });
+        const Error = new ErrorHandler(err, 500);
+        return res.status(Error.errCode).json(Error.error);
       }
 
       return res.json({ success: true, posts });
@@ -31,12 +29,8 @@ exports.create = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        code: 400,
-        status: "Check errors",
-        errors: errors.array(),
-      });
+      const Error = new ErrorHandler(null, 400, "Check errors", errors.array());
+      return res.status(Error.errCode).json(Error.error);
     }
 
     const postObj = {
@@ -47,10 +41,8 @@ exports.create = [
 
     post.create(postObj, (err, post) => {
       if (err) {
-        console.log(err);
-        return res
-          .status(500)
-          .json({ success: false, code: 500, status: "Internal server error" });
+        const Error = new ErrorHandler(err, 500);
+        return res.status(Error.errCode).json(Error.error);
       }
 
       return res.status(200).json({ success: true, post });
@@ -65,19 +57,14 @@ exports.edit = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        code: 400,
-        status: "Check errors",
-        errors: errors.array(),
-      });
+      const Error = new ErrorHandler(null, 400, "Check errors", errors.array());
+      return res.status(Error.errCode).json(Error.error);
     }
 
     post.findOneAndUpdate({ _id: req.params.postId }, (err, post) => {
       if (err) {
-        return res
-          .status(400)
-          .json({ success: false, code: 500, status: "Internal server error" });
+        const Error = new ErrorHandler(err, 500);
+        return res.status(Error.errCode).json(Error.error);
       }
 
       return res
@@ -90,9 +77,8 @@ exports.edit = [
 exports.delete = (req, res) => {
   post.findOneAndDelete(req.params.postId, (err, post) => {
     if (err) {
-      return res
-        .status(400)
-        .json({ success: false, code: 500, status: "Internal server error" });
+      const Error = new ErrorHandler(err, 500);
+      return res.status(Error.errCode).json(Error.error);
     }
 
     return res.status(200).json({ success: true, status: "Post deleted" });

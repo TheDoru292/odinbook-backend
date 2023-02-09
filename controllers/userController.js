@@ -1,6 +1,7 @@
 const { validationResult, body } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const async = require("async");
+const ErrorHandler = require("../lib/ErrorHandler");
 
 const User = require("../models/user");
 const config = require("../config");
@@ -24,28 +25,23 @@ exports.registerWithEmail = [
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        code: 400,
-        status: "Check errors",
-        errors: errors.array(),
-      });
+      const Error = new ErrorHandler(null, 400, "Check errors", errors.array());
+      return res.status(Error.errCode).json(Error.error);
     }
 
     User.findOne({ url_handle: req.body.url_handle }, (err, user) => {
       if (err) {
-        console.log(err);
-        return res
-          .status(500)
-          .json({ success: false, code: 500, status: "Internal server error" });
+        const Error = new ErrorHandler(err, 500);
+        return res.status(Error.errCode).json(Error.error);
       }
 
       if (user) {
-        return res.status(400).json({
-          success: false,
-          code: 400,
-          status: "Url handle is already in use.",
-        });
+        const Error = new ErrorHandler(
+          null,
+          400,
+          "Url handle is already in use."
+        );
+        return res.status(Error.errCode).json(Error.error);
       }
     });
 
@@ -63,12 +59,8 @@ exports.registerWithEmail = [
       },
       function (err, results) {
         if (err) {
-          console.log(err);
-          return res.status(500).json({
-            success: false,
-            code: 500,
-            status: "Internal server error",
-          });
+          const Error = new ErrorHandler(err, 500);
+          return res.status(Error.errCode).json(Error.error);
         }
 
         const userObj = {
@@ -82,12 +74,8 @@ exports.registerWithEmail = [
 
         User.create(userObj, (err, user) => {
           if (err) {
-            console.log(err);
-            return res.status(500).json({
-              success: false,
-              code: 500,
-              status: "Internal server error",
-            });
+            const Error = new ErrorHandler(err, 500);
+            return res.status(Error.errCode).json(Error.error);
           }
 
           return res.status(200).json({

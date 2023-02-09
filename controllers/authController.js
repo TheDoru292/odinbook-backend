@@ -1,23 +1,18 @@
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
+const ErrorHandler = require("../lib/ErrorHandler");
 
 exports.login = (req, res, next) => {
   passport.authenticate("local", { session: false }, (err, user, info) => {
     if (err || !user) {
-      return res.status(400).json({
-        success: false,
-        message: "Something went wrong.",
-        user: user,
-      });
+      const Error = new ErrorHandler(err || null, 400);
+      return res.status(Error.errCode).json(Error.error);
     }
 
     req.login(user, { session: false }, (err) => {
       if (err) {
-        res.status(400).json({
-          success: false,
-          code: 400,
-          status: "Bad err",
-        });
+        const Error = new ErrorHandler(err, 400);
+        return res.status(Error.code).json(Error.get);
       }
 
       const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
