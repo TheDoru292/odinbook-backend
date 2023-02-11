@@ -22,6 +22,22 @@ exports.get = (req, res) => {
   );
 };
 
+exports.getOne = (req, res) => {
+  post.findOne({ _id: req.params.postId }, (err, post) => {
+    if (err) {
+      const Error = new ErrorHandler(err, 500);
+      return res.status(Error.errCode).json(Error.error);
+    }
+
+    if (!post) {
+      const Error = new ErrorHandler(err, 404, "Post not found");
+      return res.status(Error.errCode).json(Error.error);
+    }
+
+    return res.status(200).json({ success: true, post });
+  });
+};
+
 exports.create = [
   body("content").isLength({ min: 1 }).trim().escape(),
 
@@ -54,6 +70,8 @@ exports.edit = [
   body("content").isLength({ min: 1 }).trim(),
 
   (req, res) => {
+    console.log("hi");
+
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -61,16 +79,20 @@ exports.edit = [
       return res.status(Error.errCode).json(Error.error);
     }
 
-    post.findOneAndUpdate({ _id: req.params.postId }, (err, post) => {
-      if (err) {
-        const Error = new ErrorHandler(err, 500);
-        return res.status(Error.errCode).json(Error.error);
-      }
+    post.findOneAndUpdate(
+      { _id: req.params.postId },
+      { content: req.body.content },
+      (err, post) => {
+        if (err) {
+          const Error = new ErrorHandler(err, 500);
+          return res.status(Error.errCode).json(Error.error);
+        }
 
-      return res
-        .status(200)
-        .json({ success: true, status: "Post succcessfully edited." });
-    });
+        return res
+          .status(200)
+          .json({ success: true, status: "Post succcessfully edited." });
+      }
+    );
   },
 ];
 
@@ -82,5 +104,16 @@ exports.delete = (req, res) => {
     }
 
     return res.status(200).json({ success: true, status: "Post deleted" });
+  });
+};
+
+exports.getUserPosts = (req, res) => {
+  post.find({ user: req.params.userId }, (err, posts) => {
+    if (err) {
+      const Error = new ErrorHandler(err, 500);
+      return res.status(Error.errCode).json(Error.error);
+    }
+
+    return res.status(200).json({ success: true, posts });
   });
 };
