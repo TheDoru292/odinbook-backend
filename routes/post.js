@@ -37,11 +37,21 @@ router.get(
   comment.getAllPostComments
 );
 
+router.get("/:postId/comment/:commentId", comment.get);
+
 router.post(
   "/:postId/comment",
   passport.authenticate("jwt", { session: false }),
   helper.checkIfPostExists,
   comment.post
+);
+
+router.put(
+  "/:postId/comment/:commentId",
+  passport.authenticate("jwt", { session: false }),
+  helper.checkIfPostExists,
+  helper.checkSameUserComment,
+  comment.editComment
 );
 
 router.post(
