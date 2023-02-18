@@ -93,3 +93,14 @@ exports.editComment = [
     );
   },
 ];
+
+exports.delete = (req, res) => {
+  comment.deleteOne({ _id: req.params.commentId }, (err, comment) => {
+    if (err) {
+      const Error = new ErrorHandler(err, 500);
+      return res.status(Error.errCode).json(Error.error);
+    }
+
+    return res.status(200).json({ success: true, status: "Comment deleted." });
+  });
+};

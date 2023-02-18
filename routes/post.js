@@ -54,6 +54,14 @@ router.put(
   comment.editComment
 );
 
+router.delete(
+  "/:postId/comment/:commentId",
+  passport.authenticate("jwt", { session: false }),
+  helper.checkIfPostExists,
+  helper.checkSameUserComment,
+  comment.delete
+);
+
 router.post(
   "/:postId/like",
   passport.authenticate("jwt", { session: false }),
