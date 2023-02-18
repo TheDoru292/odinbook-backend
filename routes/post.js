@@ -3,6 +3,7 @@ const router = express.Router();
 
 const comment = require("../controllers/commentController");
 const post = require("../controllers/postController");
+const like = require("../controllers/likeController");
 const helper = require("../lib/helper");
 
 const passport = require("passport");
@@ -41,6 +42,13 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   helper.checkIfPostExists,
   comment.post
+);
+
+router.post(
+  "/:postId/like",
+  passport.authenticate("jwt", { session: false }),
+  helper.checkIfLiked,
+  like.post
 );
 
 module.exports = router;
