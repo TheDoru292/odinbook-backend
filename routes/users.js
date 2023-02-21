@@ -21,10 +21,10 @@ router.post("/register", user.registerWithEmail);
 
 router.get("/:userId/post", helper.checkIfUserExists, getUserPosts);
 
-// Route to get user's friends - WORKS
+// Route to get user's friends
 router.get("/:userId/friend", friend.getUserFriends);
 
-// Route to unfriend user. -
+// Route to unfriend user
 router.delete(
   "/:userId/friend/:friendId",
   passport.authenticate("jwt", { session: false }),
@@ -87,40 +87,5 @@ router.delete(
   checkFriendReqById,
   friend.deleteOutgoingFriendRequest
 );
-
-function checkFriendReqById(req, res, next) {
-  friendReq.findOne({ _id: req.params.requestId }, (err, request) => {
-    if (err) {
-      const Error = new ErrorHandler(err, 500);
-      return res.status(Error.errCode).json(Error.error);
-    }
-
-    if (!request) {
-      const Error = new ErrorHandler(err, 400, "Request doesn't exist");
-      return res.status(Error.errCode).json(Error.error);
-    }
-
-    next();
-  });
-}
-
-function checkIfUserFriends(req, res, next) {
-  friendModel.findOne(
-    { first_user: req.params.userId, second_user: req.params.friendId },
-    (err, friend) => {
-      if (err) {
-        const Error = new ErrorHandler(err, 500);
-        return res.status(Error.errCode).json(Error.error);
-      }
-
-      if (!friend) {
-        const Error = new ErrorHandler(err, 400, "You aren't friends!");
-        return res.status(Error.errCode).json(Error.error);
-      }
-
-      next();
-    }
-  );
-}
 
 module.exports = router;
