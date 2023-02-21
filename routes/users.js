@@ -29,7 +29,7 @@ router.delete(
   "/:userId/friend/:friendId",
   passport.authenticate("jwt", { session: false }),
   helper.checkSameUser,
-  checkIfUserFriends,
+  helper.checkIfUserFriends,
   friend.removeFriend
 );
 
@@ -84,7 +84,7 @@ router.delete(
   "/:userId/friend/request/outgoing/:requestId",
   passport.authenticate("jwt", { session: false }),
   helper.checkSameUser,
-  checkFriendReqById,
+  helper.checkFriendReqById,
   friend.deleteOutgoingFriendRequest
 );
 
