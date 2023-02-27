@@ -5,14 +5,17 @@ const ErrorHandler = require("../lib/ErrorHandler");
 const mongoose = require("mongoose");
 
 exports.getUserFriends = (req, res) => {
-  friend.find({ first_user: req.params.userId }, (err, friends) => {
-    if (err) {
-      const Error = new ErrorHandler(err, 500);
-      return res.status(Error.errCode).json(Error.error);
-    }
+  friend
+    .find({ first_user: req.params.userId })
+    .populate("second_user", "username url_handle profile_picture_url")
+    .exec((err, friends) => {
+      if (err) {
+        const Error = new ErrorHandler(err, 500);
+        return res.status(Error.errCode).json(Error.error);
+      }
 
-    return res.status(200).json({ success: true, friends });
-  });
+      return res.status(200).json({ success: true, friends });
+    });
 };
 
 exports.post = (req, res) => {
@@ -22,25 +25,38 @@ exports.post = (req, res) => {
     sent_on: new Date(),
   };
 
-  friendReq.create(friendReqObj, (err, friendReq) => {
+  friendReq.create(friendReqObj, (err, friendReqObj) => {
     if (err) {
       const Error = new ErrorHandler(err, 500);
       return res.status(Error.errCode).json(Error.error);
     }
 
-    return res.status(200).json({ success: true, friendReq });
+    friendReq
+      .findOne({ _id: friendReqObj._id })
+      .populate("recipient", "username url_handle profile_picture_url")
+      .exec((err, friend) => {
+        if (err) {
+          const Error = new ErrorHandler(err, 500);
+          return res.status(Error.errCode).json(Error.error);
+        }
+
+        return res.status(200).json({ success: true, friendReq: friend });
+      });
   });
 };
 
 exports.getFriendRequests = (req, res) => {
-  friendReq.find({ recipient: req.params.userId }, (err, friendReqs) => {
-    if (err) {
-      const Error = new ErrorHandler(err, 500);
-      return res.status(Error.errCode).json(Error.error);
-    }
+  friendReq
+    .find({ recipient: req.params.userId })
+    .populate("sender", "username url_handle profile_picture_url")
+    .exec((err, friendReqs) => {
+      if (err) {
+        const Error = new ErrorHandler(err, 500);
+        return res.status(Error.errCode).json(Error.error);
+      }
 
-    return res.status(200).json({ success: true, friendReqs });
-  });
+      return res.status(200).json({ success: true, friendReqs });
+    });
 };
 
 exports.acceptFriendRequest = (req, res) => {
@@ -121,14 +137,17 @@ exports.deleteFriendRequest = (req, res) => {
 };
 
 exports.getOutgoingFriendRequests = (req, res) => {
-  friendReq.find({ sender: req.params.userId }, (err, friendReqs) => {
-    if (err) {
-      const Error = new ErrorHandler(err, 500);
-      return res.status(Error.errCode).json(Error.error);
-    }
+  friendReq
+    .find({ sender: req.params.userId })
+    .populate("recipient", "username url_handle profile_picture_url")
+    .exec((err, friendReqs) => {
+      if (err) {
+        const Error = new ErrorHandler(err, 500);
+        return res.status(Error.errCode).json(Error.error);
+      }
 
-    return res.status(200).json({ success: true, friendReqs });
-  });
+      return res.status(200).json({ success: true, friendReqs });
+    });
 };
 
 exports.deleteOutgoingFriendRequest = (req, res) => {

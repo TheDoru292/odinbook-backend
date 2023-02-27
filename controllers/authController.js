@@ -5,7 +5,11 @@ const ErrorHandler = require("../lib/ErrorHandler");
 exports.login = (req, res, next) => {
   passport.authenticate("local", { session: false }, (err, user, info) => {
     if (err || !user) {
-      const Error = new ErrorHandler(err || null, 400);
+      const Error = new ErrorHandler(
+        err || null,
+        400,
+        "Incorrect username or password"
+      );
       return res.status(Error.errCode).json(Error.error);
     }
 
@@ -16,10 +20,15 @@ exports.login = (req, res, next) => {
       }
 
       const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
+        // expiresIn: "1h",
       });
 
-      return res.json({ success: true, token });
+      console.log(user);
+
+      return res.json({
+        success: true,
+        token,
+      });
     });
   })(req, res);
 };

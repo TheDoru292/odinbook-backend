@@ -1,6 +1,9 @@
 const { body, validationResult } = require("express-validator");
 const post = require("../models/post");
 const ErrorHandler = require("../lib/ErrorHandler");
+const async = require("async");
+const like = require("../models/like");
+const comment = require("../models/comment");
 
 exports.get = (req, res) => {
   const { page = 1, limit = 10 } = req.query;
@@ -10,6 +13,7 @@ exports.get = (req, res) => {
     {
       page,
       limit,
+      select: "_id",
     },
     (err, posts) => {
       if (err) {
@@ -17,7 +21,68 @@ exports.get = (req, res) => {
         return res.status(Error.errCode).json(Error.error);
       }
 
-      return res.json({ success: true, posts });
+      const array = [];
+
+      async.forEach(
+        posts.docs,
+        (document, callback) => {
+          post
+            .findOne({ _id: document._id })
+            .populate("user", "-email -password")
+            .exec((err, post) => {
+              if (err) {
+                callback(err);
+              }
+
+              like.countDocuments({ post: post._id }, (err, likes) => {
+                if (err) {
+                  callback(err);
+                }
+
+                like.findOne(
+                  { user: req.user._id, post: post._id },
+                  (err, like) => {
+                    if (err) {
+                      callback(err);
+                    }
+
+                    comment
+                      .find({ post: post._id })
+                      .populate(
+                        "user",
+                        "username url_handle profile_picture_url"
+                      )
+                      .exec((err, comments) => {
+                        if (err) {
+                          callback(err);
+                        }
+
+                        const obj = {
+                          post: post,
+                          likes: {
+                            count: likes,
+                          },
+                          liked: like == null ? false : true,
+                          comments,
+                        };
+
+                        array.push(obj);
+
+                        callback();
+                      });
+                  }
+                );
+              });
+            });
+        },
+        function (err) {
+          if (err) {
+            const Error = new ErrorHandler(err, 500);
+            return res.status(Error.errCode).json(Error.error);
+          }
+          return res.json({ success: true, posts: array });
+        }
+      );
     }
   );
 };
@@ -108,12 +173,70 @@ exports.delete = (req, res) => {
 };
 
 exports.getUserPosts = (req, res) => {
-  post.find({ user: req.params.userId }, (err, posts) => {
+  post.find({ user: req.params.userId }, "_id", (err, posts) => {
     if (err) {
       const Error = new ErrorHandler(err, 500);
       return res.status(Error.errCode).json(Error.error);
     }
 
-    return res.status(200).json({ success: true, posts });
+    array = [];
+
+    async.forEach(
+      posts,
+      (document, callback) => {
+        post
+          .findOne({ _id: document._id })
+          .populate("user", "-email -password")
+          .exec((err, post) => {
+            if (err) {
+              callback(err);
+            }
+
+            like.countDocuments({ post: post._id }, (err, likes) => {
+              if (err) {
+                callback(err);
+              }
+
+              like.findOne(
+                { user: req.user._id, post: post._id },
+                (err, like) => {
+                  if (err) {
+                    callback(err);
+                  }
+
+                  comment
+                    .find({ post: post._id })
+                    .populate("user", "username url_handle profile_picture_url")
+                    .exec((err, comments) => {
+                      if (err) {
+                        callback(err);
+                      }
+
+                      const obj = {
+                        post: post,
+                        likes: {
+                          count: likes,
+                        },
+                        liked: like == null ? false : true,
+                        comments,
+                      };
+
+                      array.push(obj);
+
+                      callback();
+                    });
+                }
+              );
+            });
+          });
+      },
+      function (err) {
+        if (err) {
+          const Error = new ErrorHandler(err, 500);
+          return res.status(Error.errCode).json(Error.error);
+        }
+        return res.json({ success: true, posts: array });
+      }
+    );
   });
 };

@@ -12,14 +12,24 @@ const passport = require("passport");
 const friendReq = require("../models/friendReq");
 require("../passport");
 
-/* GET users listing. */
-router.get("/", function (req, res, next) {
-  res.send("respond with a resource");
-});
+router.get("/", user.getAll);
+
+router.get(
+  "/friends",
+  passport.authenticate("jwt", { session: false }),
+  user.getAllWithoutFriends
+);
+
+router.get("/:urlHandle", user.get);
 
 router.post("/register", user.registerWithEmail);
 
-router.get("/:userId/post", helper.checkIfUserExists, getUserPosts);
+router.get(
+  "/:userId/post",
+  passport.authenticate("jwt", { session: false }),
+  helper.checkIfUserExists,
+  getUserPosts
+);
 
 // Route to get user's friends
 router.get("/:userId/friend", friend.getUserFriends);

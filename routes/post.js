@@ -9,7 +9,7 @@ const helper = require("../lib/helper");
 const passport = require("passport");
 require("../passport");
 
-router.get("/", post.get);
+router.get("/", passport.authenticate("jwt", { session: false }), post.get);
 
 router.post("/", passport.authenticate("jwt", { session: false }), post.create);
 
