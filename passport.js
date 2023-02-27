@@ -21,6 +21,10 @@ passport.use(
           return cb(err);
         }
 
+        if (!user) {
+          return cb(null, false, { message: "Invalid email or password." });
+        }
+
         bcrpyt.compare(password, user.password, (err, success) => {
           if (err) {
             return cb(err);
