@@ -15,7 +15,7 @@ const app = express();
 
 const corsOptions = {
   credentials: true,
-  origin: "http://localhost:3001",
+  origin: "https://odinbook-frontend.onrender.com/",
   optionsSuccessStatus: 200,
 };
 
