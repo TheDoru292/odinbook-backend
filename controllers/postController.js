@@ -153,6 +153,11 @@ exports.edit = [
           return res.status(Error.errCode).json(Error.error);
         }
 
+        if (String(post.user._id) != String(req.user._id)) {
+          const Error = new ErrorHandler(err, 403);
+          return res.status(Error.errCode).json(Error.error);
+        }
+
         return res
           .status(200)
           .json({ success: true, status: "Post succcessfully edited." });
@@ -162,14 +167,45 @@ exports.edit = [
 ];
 
 exports.delete = (req, res) => {
-  post.findOneAndDelete(req.params.postId, (err, post) => {
-    if (err) {
-      const Error = new ErrorHandler(err, 500);
-      return res.status(Error.errCode).json(Error.error);
-    }
+  async.parallel(
+    {
+      post: function (callback) {
+        post.findOneAndDelete({ _id: req.params.postId }, (err, post) => {
+          if (err) {
+            callback(err);
+          }
 
-    return res.status(200).json({ success: true, status: "Post deleted" });
-  });
+          callback(null, "Post deleted.");
+        });
+      },
+      comments: function (callback) {
+        comment.deleteMany({ post: req.params.postId }, (err, comments) => {
+          if (err) {
+            callback(err);
+          }
+
+          callback(null, "Comments deleted.");
+        });
+      },
+      likes: function (callback) {
+        like.deleteMany({ post: req.params.postId }, (err, likes) => {
+          if (err) {
+            callback(err);
+          }
+
+          callback(null, "Likes deleted");
+        });
+      },
+    },
+    function (err, results) {
+      if (err) {
+        const Error = new ErrorHandler(err, 500);
+        return res.status(Error.errCode).json(Error.error);
+      }
+
+      return res.status(200).json({ success: true, results });
+    }
+  );
 };
 
 exports.getUserPosts = (req, res) => {

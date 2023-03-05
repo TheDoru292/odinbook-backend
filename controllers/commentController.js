@@ -65,12 +65,7 @@ exports.editComment = [
     const error = validationResult(req);
 
     if (!error.isEmpty()) {
-      const Error = new ErrorHandler(
-        null,
-        400,
-        "Check errors",
-        validationErrors.array()
-      );
+      const Error = new ErrorHandler(null, 400, "Check errors", error.array());
       return res.status(Error.errCode).json(Error.error);
     }
 

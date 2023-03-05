@@ -14,16 +14,17 @@ const app = express();
 // view engine setup
 
 const corsOptions = {
+  credentials: true,
   origin: "http://localhost:3001",
-  optionsSuccessStatus: 200
-}
+  optionsSuccessStatus: 200,
+};
 
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use("/api", apiRouter);
 

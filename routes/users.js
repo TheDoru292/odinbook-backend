@@ -14,6 +14,19 @@ require("../passport");
 
 router.get("/", user.getAll);
 
+router.put(
+  "/:userId",
+  passport.authenticate("jwt", { session: false }),
+  helper.checkSameUser,
+  user.editProfile
+);
+
+router.get(
+  "/check/:userId",
+  passport.authenticate("jwt", { session: false }),
+  user.checkFriendReq
+);
+
 router.get(
   "/friends",
   passport.authenticate("jwt", { session: false }),
@@ -21,6 +34,8 @@ router.get(
 );
 
 router.get("/:urlHandle", user.get);
+
+router.get("/profile", passport.authenticate("jwt", { session: false }));
 
 router.post("/register", user.registerWithEmail);
 

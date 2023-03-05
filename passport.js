@@ -53,6 +53,8 @@ passport.use(
           return cb(err);
         }
 
+        console.log(user);
+
         return cb(null, user);
       });
     }

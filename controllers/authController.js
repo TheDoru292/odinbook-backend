@@ -25,8 +25,19 @@ exports.login = (req, res, next) => {
 
       console.log(user);
 
+      const userObj = {
+        _id: user._id,
+        username: user.username,
+        url_handle: user.url_handle,
+        profile_picture_url: user.profile_picture_url,
+        registered_on: user.registered_on,
+      };
+
+      res.cookie("token", token, { maxAge: 31536000 * 60 * 20 });
+
       return res.json({
         success: true,
+        user: userObj,
         token,
       });
     });
