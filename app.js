@@ -1,3 +1,4 @@
+require("dotenv").config();
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
@@ -15,7 +16,7 @@ const app = express();
 
 const corsOptions = {
   credentials: true,
-  origin: "https://odinbook-frontend-oa4hf0q2f-thedoru292.vercel.app",
+  origin: process.env.ORIGIN,
   optionsSuccessStatus: 200,
 };
 
