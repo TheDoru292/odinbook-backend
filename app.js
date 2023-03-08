@@ -29,7 +29,7 @@ app.use(cors(corsOptions));
 app.use(
   "/api",
   (req, res, next) => {
-    console.log(req.hostname);
+    console.log(req.get("origin"));
     next();
   },
   apiRouter
