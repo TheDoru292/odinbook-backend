@@ -28,7 +28,7 @@ app.use(cors(corsOptions));
 
 app.use(
   "/api",
-  (res, res, next) => {
+  (req, res, next) => {
     console.log(req.hostname);
     next();
   },
