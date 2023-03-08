@@ -15,7 +15,7 @@ const app = express();
 
 const corsOptions = {
   credentials: true,
-  origin: "https://odinbook-frontend.onrender.com",
+  origin: "https://odinbook-frontend-woad.vercel.app",
   optionsSuccessStatus: 200,
 };
 
