@@ -6,9 +6,13 @@ const like = require("../models/like");
 const comment = require("../models/comment");
 
 exports.get = (req, res) => {
+  const { page = 1, limit = 999 } = req.query;
+
   post.paginate(
     {},
     {
+      page,
+      limit,
       select: "_id",
     },
     (err, posts) => {
